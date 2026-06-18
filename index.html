@@ -250,11 +250,25 @@ const SET_B = [
   {role:'導師', type:'flow', amount:15000},
   {role:'導師', type:'deal', amount:35000},
 ];
+const SET_MULTI_OFFICIAL = [
+  {role:'一般', type:'flow', amount:4500},
+  {role:'學員', type:'flow', amount:7500},
+  {role:'學員', type:'deal', amount:15000},
+  {role:'導師', type:'flow', amount:15000},
+  {role:'導師', type:'deal', amount:22500},
+];
+const SET_MENTOR_OFFICIAL = [
+  {role:'一般', type:'flow', amount:6000},
+  {role:'學員', type:'flow', amount:10000},
+  {role:'學員', type:'deal', amount:20000},
+  {role:'導師', type:'flow', amount:20000},
+  {role:'導師', type:'deal', amount:30000},
+];
 const DATA = {
   multi:{
     name:'學員班 · 一對多',
     plans:[
-      {name:'正式價格', price:150000, meta:'標準定價', commission:null},
+      {name:'正式價格', price:150000, flag:'has', flagText:'有分潤', meta:'標準定價', commission:SET_MULTI_OFFICIAL, commissionNote:'成交諮詢若需 Linda 出席，扣 5%'},
       {name:'推廣期價', price:100000, flag:'promo', flagText:'至 2026/6', meta:'推廣期',
         commission:SET_A, validity:{until:new Date(2026,6,1), untilLabel:'2026/6'}},
       {name:'常態價', price:110000, flag:'has', flagText:'有分潤', meta:'2026/7 起',
@@ -272,7 +286,7 @@ const DATA = {
   mentor:{
     name:'導師班 · 一對多',
     plans:[
-      {name:'正式價格', price:200000, meta:'不含學員班', commission:null},
+      {name:'正式價格', price:200000, flag:'has', flagText:'有分潤', meta:'不含學員班', commission:SET_MENTOR_OFFICIAL, commissionNote:'成交諮詢若需 Linda 出席，扣 5%'},
       {name:'推廣加收', price:70000, flag:'promo', flagText:'至 2025/9', meta:'學員班＋7萬',
         commission:SET_A, validity:{until:new Date(2025,9,1), untilLabel:'2025/9'}},
       {name:'常態加收', price:100000, flag:'has', flagText:'有分潤', meta:'2025/10 起｜學員班＋10萬',
