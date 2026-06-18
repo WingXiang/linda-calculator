@@ -132,6 +132,7 @@
   table.rows input:focus,table.rows select:focus{outline:none;
     border-color:var(--brand);background:var(--brand-l)}
   .unit-cell{font-weight:700;color:var(--brand-d);white-space:nowrap;min-width:90px}
+  .unit-cell .pct-tag{font-size:10.5px;color:var(--muted);font-weight:500;margin-left:3px}
   .sub-cell{font-weight:800;color:var(--ink);white-space:nowrap;min-width:90px}
   .row-del{background:none;border:none;color:var(--muted);font-size:16px;
     cursor:pointer;padding:4px 8px;border-radius:6px;transition:.15s;line-height:1}
@@ -299,10 +300,15 @@ const PLAN_OPTIONS = [];
 Object.entries(DATA).forEach(([k,c])=>{
   c.plans.forEach((p,i)=>{
     if(p.commission){
-      PLAN_OPTIONS.push({key:k+':'+i, label:c.name+' · '+p.name, commission:p.commission, validity:p.validity||null});
+      PLAN_OPTIONS.push({key:k+':'+i, label:c.name+' · '+p.name, commission:p.commission, validity:p.validity||null, price:p.price});
     }
   });
 });
+function formatPct(amount, price){
+  if(!price)return '';
+  const pct = amount/price*100;
+  return Math.abs(pct-Math.round(pct))<0.05 ? Math.round(pct)+'%' : pct.toFixed(1)+'%';
+}
 const PLAN_MAP = Object.fromEntries(PLAN_OPTIONS.map(o=>[o.key,o]));
 
 const ROLES = ['一般','學員','導師'];
@@ -465,7 +471,8 @@ function updateRowDerived(payeeId, row){
   const sub = (amt!=null) ? amt*(row.qty||0) : 0;
   const unit = tr.querySelector('.unit-cell');
   if(amt!=null){
-    unit.textContent = '$'+amt.toLocaleString();
+    const planPrice = PLAN_MAP[row.planKey] ? PLAN_MAP[row.planKey].price : null;
+    unit.innerHTML = '$'+amt.toLocaleString()+(planPrice ? ' <small class="pct-tag">('+formatPct(amt, planPrice)+')</small>' : '');
     unit.classList.remove('warn');
     unit.removeAttribute('title');
   } else if(invalid){
@@ -544,8 +551,9 @@ function renderPayeeRows(p){
     const invalid = !!(r.planKey && r.role && r.type && amt===null);
     const validity = planValidity(r.planKey);
     const sub = (amt!=null) ? amt*(r.qty||0) : 0;
+    const planPrice = r.planKey && PLAN_MAP[r.planKey] ? PLAN_MAP[r.planKey].price : null;
     const unitHtml = amt!=null
-      ? '$'+amt.toLocaleString()
+      ? '$'+amt.toLocaleString()+(planPrice ? ' <small class="pct-tag">('+formatPct(amt, planPrice)+')</small>' : '')
       : invalid
         ? '⚠ 無此組合'
         : '—';
