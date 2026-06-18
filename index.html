@@ -269,9 +269,7 @@ const DATA = {
   multi:{
     name:'學員班 · 一對多',
     plans:[
-      {name:'正式價格', price:150000, flag:'has', flagText:'有分潤', meta:'標準定價', commission:SET_MULTI_OFFICIAL, commissionNote:'成交諮詢若需 Linda 出席，扣 5%'},
-      {name:'推廣期價', price:100000, flag:'promo', flagText:'至 2026/6', meta:'推廣期',
-        commission:SET_A, validity:{until:new Date(2026,6,1), untilLabel:'2026/6'}},
+      {name:'正式價格', price:150000, flag:'has', flagText:'有分潤', meta:'標準定價', commission:SET_MULTI_OFFICIAL, showPercent:true, commissionNote:'成交諮詢若需 Linda 出席，扣 5%'},
       {name:'常態價', price:110000, flag:'has', flagText:'有分潤', meta:'2026/7 起',
         commission:SET_A, validity:{from:new Date(2026,6,1), fromLabel:'2026/7'}},
     ]
@@ -287,9 +285,7 @@ const DATA = {
   mentor:{
     name:'導師班 · 一對多',
     plans:[
-      {name:'正式價格', price:200000, flag:'has', flagText:'有分潤', meta:'不含學員班', commission:SET_MENTOR_OFFICIAL, commissionNote:'成交諮詢若需 Linda 出席，扣 5%'},
-      {name:'推廣加收', price:70000, flag:'promo', flagText:'至 2025/9', meta:'學員班＋7萬',
-        commission:SET_A, validity:{until:new Date(2025,9,1), untilLabel:'2025/9'}},
+      {name:'正式價格', price:200000, flag:'has', flagText:'有分潤', meta:'不含學員班', commission:SET_MENTOR_OFFICIAL, showPercent:true, commissionNote:'成交諮詢若需 Linda 出席，扣 5%'},
       {name:'常態加收', price:100000, flag:'has', flagText:'有分潤', meta:'2025/10 起｜學員班＋10萬',
         commission:SET_A, validity:{from:new Date(2025,9,1), fromLabel:'2025/10'}},
     ]
@@ -300,7 +296,7 @@ const PLAN_OPTIONS = [];
 Object.entries(DATA).forEach(([k,c])=>{
   c.plans.forEach((p,i)=>{
     if(p.commission){
-      PLAN_OPTIONS.push({key:k+':'+i, label:c.name+' · '+p.name, commission:p.commission, validity:p.validity||null, price:p.price});
+      PLAN_OPTIONS.push({key:k+':'+i, label:c.name+' · '+p.name, commission:p.commission, validity:p.validity||null, price:p.price, showPercent:!!p.showPercent});
     }
   });
 });
@@ -471,8 +467,9 @@ function updateRowDerived(payeeId, row){
   const sub = (amt!=null) ? amt*(row.qty||0) : 0;
   const unit = tr.querySelector('.unit-cell');
   if(amt!=null){
-    const planPrice = PLAN_MAP[row.planKey] ? PLAN_MAP[row.planKey].price : null;
-    unit.innerHTML = '$'+amt.toLocaleString()+(planPrice ? ' <small class="pct-tag">('+formatPct(amt, planPrice)+')</small>' : '');
+    const planInfo = PLAN_MAP[row.planKey];
+    const showPct = planInfo && planInfo.showPercent && planInfo.price;
+    unit.innerHTML = '$'+amt.toLocaleString()+(showPct ? ' <small class="pct-tag">('+formatPct(amt, planInfo.price)+')</small>' : '');
     unit.classList.remove('warn');
     unit.removeAttribute('title');
   } else if(invalid){
@@ -551,9 +548,10 @@ function renderPayeeRows(p){
     const invalid = !!(r.planKey && r.role && r.type && amt===null);
     const validity = planValidity(r.planKey);
     const sub = (amt!=null) ? amt*(r.qty||0) : 0;
-    const planPrice = r.planKey && PLAN_MAP[r.planKey] ? PLAN_MAP[r.planKey].price : null;
+    const planInfo = r.planKey ? PLAN_MAP[r.planKey] : null;
+    const showPct = planInfo && planInfo.showPercent && planInfo.price;
     const unitHtml = amt!=null
-      ? '$'+amt.toLocaleString()+(planPrice ? ' <small class="pct-tag">('+formatPct(amt, planPrice)+')</small>' : '')
+      ? '$'+amt.toLocaleString()+(showPct ? ' <small class="pct-tag">('+formatPct(amt, planInfo.price)+')</small>' : '')
       : invalid
         ? '⚠ 無此組合'
         : '—';
